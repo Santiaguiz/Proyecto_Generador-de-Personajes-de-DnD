@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Personajes DnD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+        
+        body {
+            font-family: 'MedievalSharp', cursive;
+            background-color: #1a1a2e;
+            color: #f8f8f2;
+            background-image: url('https://www.transparenttextures.com/patterns/black-paper.png');
+            cursor: crosshair;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .character-tab {
+            background-color: #2a2a3a;
+            border: 3px solid #8b5a2b;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 0.5rem;
+        }
+        
+        .stat-circle {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #8b5a2b;
+            background-color: #1a1a2e;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-circle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px gold;
+        }
+        
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button:hover {
+            background-color: #3a3a4a;
+            transform: translateY(-3px);
+        }
+        
+        .generate-btn {
+            background: linear-gradient(to right, #8b5a2b, #6d4c2b);
+            transition: all 0.3s ease;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(139, 90, 43, 0.4);
+        }
+        
+        .race-card {
+            background-color: #3a3a4a;
+            border: 1px solid #8b5a2b;
+            transition: all 0.3s ease;
+        }
+        
+        .race-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(139, 90, 43, 0.4);
+            border-color: gold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-amber-600 mb-2">Generador de Personajes DnD</h1>
+            <p class="text-xl text-gray-300">Forja el destino de tu aventurero</p>
+        </header>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Panel de Creación -->
+            <div class="lg:col-span-2 character-tab p-6">
+                <div class="flex space-x-2 mb-6">
+                    <button class="tab-button px-4 py-2 bg-amber-800 rounded-t-lg font-bold" onclick="changeTab('race')">Raza</button>
+                    <button class="tab-button px-4 py-2 bg-gray-700 rounded-t-lg font-bold" onclick="changeTab('class')">Clase</button>
+                    <button class="tab-button px-4 py-2 bg-gray-700 rounded-t-lg font-bold" onclick="changeTab('stats')">Atributos</button>
+                </div>
+                
+                <!-- Contenido de Raza -->
+                <div id="race-tab">
+                    <h2 class="text-2xl font-bold mb-4 text-amber-400">Elige tu Linaje</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="races-container">
+                        <!-- Las razas se cargarán dinámicamente -->
+                    </div>
+                </div>
+                
+                <!-- Contenido de Clase -->
+                <div id="class-tab" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4 text-amber-400">Selecciona tu Camino</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="classes-container">
+                        <!-- Las clases se cargarán dinámicamente -->
+                    </div>
+                </div>
+                
+                <!-- Contenido de Atributos -->
+                <div id="stats-tab" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4 text-amber-400">Atributos del Héroe</h2>
+                    <div class="mb-6">
+                        <button id="roll-stats" class="generate-btn px-4 py-2 rounded-lg font-bold text-lg w-full mb-4">Rodar Atributos</button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        <!-- Stats se generarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vista Previa -->
+            <div class="character-tab p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center text-amber-400">Tu Personaje</h2>
+                
+                <div class="text-center mb-8">
+                    <div class="inline-block bg-gray-700 rounded-full w-40 h-40 flex items-center justify-center mb-4 border-4 border-amber-600">
+                        <span class="text-6xl" id="character-icon">🧙‍♂️</span>
+                    </div>
+                    <h3 id="preview-name" class="text-2xl font-bold text-amber-300">Nombre del Héroe</h3>
+                    <p id="preview-race-class" class="text-lg text-gray-400">Elige una Raza y Clase</p>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="font-bold text-xl mb-3 border-b border-gray-600 pb-2 text-amber-400">Atributos</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Fuerza:</span>
+                            <span id="preview-strength" class="font-bold">10 (+0)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Destreza:</span>
+                            <span id="preview-dexterity" class="font-bold">10 (+0)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Constitución:</span>
+                            <span id="preview-constitution" class="font-bold">10 (+0)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Inteligencia:</span>
+                            <span id="preview-intelligence" class="font-bold">10 (+0)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Sabiduría:</span>
+                            <span id="preview-wisdom" class="font-bold">10 (+0)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Carisma:</span>
+                            <span id="preview-charisma" class="font-bold">10 (+0)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-8">
+                    <button id="generate-btn" class="generate-btn px-6 py-3 rounded-lg font-bold text-xl w-full">Generar Ficha Completa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Modal para la ficha completa -->
+<div id="character-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4 z-50">
+  <div class="character-sheet w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-3xl text-amber-400 hover:text-amber-200">&times;</button>
+    
+    <div id="character-sheet-content" class="p-8">
+      <!-- Contenido dinámico se insertará aquí -->
+    </div>
+  </div>
+</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
